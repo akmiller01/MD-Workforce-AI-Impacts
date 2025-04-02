@@ -17,6 +17,3 @@ detailed_occupations = subset(dat, O_GROUP=="detailed")
 
 all_occupation_titles = data.frame(occupation_title=unique(detailed_occupations$OCC_TITLE))
 fwrite(all_occupation_titles, "input/all_occupation_titles.csv")
-
-md = subset(detailed_occupations, AREA==24)
-fwrite(md, "maryland_occupations.csv")
