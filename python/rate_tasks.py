@@ -1,14 +1,12 @@
 import pandas as pd
 import os
 from pydantic import BaseModel
-import google
 from google import genai
-import time
-import json
 from dotenv import load_dotenv
-from openai import OpenAI, OpenAIError
+from openai import OpenAI
 from tqdm import tqdm
 import argparse
+from common import query_gemini, query_gpt
 
 GEMINI_TASK_SYSTEM_PROMPT = (
     "For the cross-industry occupation title and specific task below, rate the task's exposure to AI automation from 1-5. "
@@ -19,6 +17,7 @@ GEMINI_TASK_SYSTEM_PROMPT = (
     "- 4: AI can perform the task as well as an expert human\n"
     "- 5: AI can perform the task better than an expert human\n"
     "Consider the entire spectrum of that occupation's duties and responsibilities, both online (if applicable) and in person, in formulating the ratings. "
+    "Also consider the legal, physical, and emotional requirements of the task. Most tasks that require a physical presence should be rated 1. "
     "Please respond only with valid JSON in the specified format.\nThe occupation title and task are:\n{} - {}"
 )
 
@@ -31,82 +30,13 @@ GPT_TASK_SYSTEM_PROMPT = (
     "- 4: AI can perform the task as well as an expert human\n"
     "- 5: AI can perform the task better than an expert human\n"
     "Consider the entire spectrum of that occupation's duties and responsibilities, both online (if applicable) and in person, in formulating the ratings. "
+    "Also consider the legal, physical, and emotional requirements of the task. Most tasks that require a physical presence should be rated 1. "
     "Please respond only with valid JSON in the specified format."
 )
 
 
 class TaskRating(BaseModel):
     rating: int
-
-
-def query_gemini(client, contents, response_format):
-    time.sleep(4) # Free tier rate limit of 15 per minute
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                # model='gemini-2.5-pro-exp-03-25',
-                model = 'gemini-2.0-flash',
-                contents=contents,
-                config={
-                    'response_mime_type': 'application/json',
-                    'response_schema': response_format,
-                },
-            )
-            json_response = json.loads(response.text)
-            return json_response
-        except google.genai.errors.ServerError as e:
-            print(f"Connection error: {e}")
-            if attempt < max_retries - 1:
-                sleep_duration = (2 ** attempt) * 1
-                print(f"Retrying in {sleep_duration} seconds...")
-                time.sleep(sleep_duration)
-            else:
-                print("Max retries reached.  Returning None.")
-                return None
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-            print(f"Response text: {response.text}")
-            if attempt < max_retries - 1:
-                sleep_duration = (2 ** attempt) * 1
-                print(f"Retrying in {sleep_duration} seconds...")
-                time.sleep(sleep_duration)
-            else:
-                print("Max retries reached.  Returning None.")
-                return None
-    return None
-
-def query_gpt(client, contents, response_format):
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            completion = client.beta.chat.completions.parse(
-                model='gpt-4o-mini',
-                messages=contents,
-                response_format=response_format
-            )
-            json_response = completion.choices[0].message.parsed
-            return json_response.model_dump()
-        except OpenAIError as e:
-            print(f"Connection error: {e}")
-            if attempt < max_retries - 1:
-                sleep_duration = (2 ** attempt) * 1
-                print(f"Retrying in {sleep_duration} seconds...")
-                time.sleep(sleep_duration)
-            else:
-                print("Max retries reached.  Returning None.")
-                return None
-        except json.JSONDecodeError as e:
-            print(f"JSON decode error: {e}")
-            print(f"Response text: {response.text}")
-            if attempt < max_retries - 1:
-                sleep_duration = (2 ** attempt) * 1
-                print(f"Retrying in {sleep_duration} seconds...")
-                time.sleep(sleep_duration)
-            else:
-                print("Max retries reached.  Returning None.")
-                return None
-    return None
 
 
 def main():
