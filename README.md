@@ -7,22 +7,19 @@ First, occupation titles and the total employment in that occupation per state f
 
 Second, a system prompt was designed in order to disaggregate each occupation into a list of associated daily tasks. For each occupation, an LLM was tasked with enumerating each of those tasks. The enumation system prompt is as follows:
 
-```
-For the cross-industry occupation title given by the user, please enumerate a full list of reasonable tasks that a person in that occupation would need to perform on a daily basis. Consider the entire spectrum of that individual's duties and responsibilities, both online (if applicable) and in person, in formulating the tasks. Please respond only with valid JSON in the specified format.
-```
+> For the cross-industry occupation title given by the user, please enumerate a full list of reasonable tasks that a person in that occupation would need to perform on a daily basis. Consider the entire spectrum of that individual's duties and responsibilities, both online (if applicable) and in person, in formulating the tasks. Please respond only with valid JSON in the specified format.
 
 Lastly, a system prompt was designed in order to rate each occupation and task by the ability for an AI to complete it. It was important in the prompt to emphasize the legal, physical, and emotional requirements of each task, otherwise the LLM tended to over-estimate the ability for AI to complete it. The rating system prompt is as follows:
 
-```
-For the cross-industry occupation title and specific task given by the user, rate the task's exposure to AI automation from 1-5.
-The ratings have the following interpretations:
-- 1: AI cannot perform the task at all
-- 2: AI can perform the task with assistance from a human operator
-- 3: AI can perform the task as well as an average human
-- 4: AI can perform the task as well as an expert human
-- 5: AI can perform the task better than an expert human
-Consider the entire spectrum of that occupation's duties and responsibilities, both online (if applicable) and in person, in formulating the ratings. Also consider the legal, physical, and emotional requirements of the task. Most tasks that require a physical presence should be rated 1. Please respond only with valid JSON in the specified format.
-```
+
+> For the cross-industry occupation title and specific task given by the user, rate the task's exposure to AI automation from 1-5.
+> The ratings have the following interpretations:
+> - 1: AI cannot perform the task at all
+> - 2: AI can perform the task with assistance from a human operator
+> - 3: AI can perform the task as well as an average human
+> - 4: AI can perform the task as well as an expert human
+> - 5: AI can perform the task better than an expert human
+> Consider the entire spectrum of that occupation's duties and responsibilities, both online (if applicable) and in person, in formulating the ratings. Also consider the legal, physical, and emotional requirements of the task. Most tasks that require a physical presence should be rated 1. Please respond only with valid JSON in the specified format.
 
 When aggregating the task ratings by occupation, certain thresholds were set to establish categories of risk:
 - **High automation risk**: Occupations for which 50% or more of their tasks could be performed by AI at average human level or better.
