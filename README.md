@@ -19,6 +19,7 @@ Lastly, a system prompt was designed in order to rate each occupation and task b
 > - 3: AI can perform the task as well as an average human
 > - 4: AI can perform the task as well as an expert human
 > - 5: AI can perform the task better than an expert human
+> 
 > Consider the entire spectrum of that occupation's duties and responsibilities, both online (if applicable) and in person, in formulating the ratings. Also consider the legal, physical, and emotional requirements of the task. Most tasks that require a physical presence should be rated 1. Please respond only with valid JSON in the specified format.
 
 When aggregating the task ratings by occupation, certain thresholds were set to establish categories of risk:
